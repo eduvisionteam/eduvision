@@ -166,7 +166,7 @@ async function triggerGenerate() {
   setStatus('Submitting request...');
 
   try {
-    const response = await fetch('/generate', {
+    const response = await fetch(' https://eduvision-xsch.onrender.com', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
