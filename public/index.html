@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduVision | AI Educational Visual Generator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="bg-aurora"></div>
+<div class="bg-mid-orb"></div>
+<div class="bg-grid"></div>
+<div class="bg-noise"></div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L14.4 9.6H22L15.8 14.4L18.2 22L12 17.2L5.8 22L8.2 14.4L2 9.6H9.6L12 2Z"
+            fill="rgba(255,255,255,.92)" stroke="rgba(255,255,255,.2)" stroke-width=".5"/>
+        </svg>
+      </div>
+      <div class="logo-wordmark">
+        <span class="logo-title">EduVision</span>
+        <span class="logo-sub">AI Educational Visual Generator</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="hero">
+      <h1 class="hero-title">
+        Turn concepts into<br><em>powerful visuals</em>
+      </h1>
+      <p class="hero-sub">
+        Designed for students and educators — generate textbook-style, labeled,
+        high-quality educational visuals instantly.
+      </p>
+      <div class="hero-divider"></div>
+    </div>
+
+    <div class="studio">
+
+      <!-- Prompt Card -->
+      <div class="prompt-card">
+        <textarea id="prompt"
+          placeholder="Example: Labeled diagram of the human heart showing atria, ventricles, valves, and blood flow direction..."
+          spellcheck="true"
+          autocomplete="off"
+          maxlength="1000"></textarea>
+
+        <div class="prompt-footer">
+          <div class="prompt-hint">
+            <span style="margin-left:4px">
+              Press Ctrl + Enter to generate
+            </span>
+          </div>
+          <span class="char-counter" id="charCounter">0 / 1000</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls-row">
+
+        <div class="pill-group">
+          <span class="pill-label">Size</span>
+          <div class="pill-select-wrap">
+            <select class="pill-select" id="sizeSelect">
+              <option value="1024x576">1024 × 576</option>
+              <option value="1024x1024" selected>1024 × 1024</option>
+              <option value="576x1024">576 × 1024</option>
+              <option value="1280x720">1280 × 720</option>
+              <option value="1920x1080">1920 × 1080</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pill-group">
+          <span class="pill-label">Steps</span>
+          <div class="pill-select-wrap">
+            <select class="pill-select" id="stepsSelect">
+              <option value="20">20</option>
+              <option value="28" selected>28</option>
+              <option value="35">35</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn-generate" id="generateBtn">
+          Generate Visual
+        </button>
+
+      </div>
+
+      <!-- Output -->
+      <div class="output-area" id="outputArea">
+
+        <div class="status-bar hidden" id="statusBar">
+          <div class="status-dot pulsing" id="statusDot"></div>
+          <div class="status-text" id="statusText">Initializing...</div>
+        </div>
+
+        <div class="error-box hidden" id="errorBox">
+          <span id="errorText"></span>
+        </div>
+
+        <div class="image-card hidden" id="imageCard">
+          <div class="image-wrap" id="imageWrap">
+            <div class="skeleton" id="skeleton"></div>
+          </div>
+
+          <div class="image-meta">
+            <div class="image-prompt-preview" id="promptPreview">
+              <span></span>
+            </div>
+
+            <button class="btn-download" id="downloadBtn">
+              Download
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-love">
+      Made with <span class="heart">&#9829;</span> by <strong>Team Nexus</strong>
+    </p>
+
+    <p class="footer-credits">
+      Project by <strong>Aishwaryalakshmi V K</strong>,
+      <strong>Hamsvahini O D S</strong> &
+      <strong>Lakshitaa S D</strong>
+    </p>
+
+    <div class="footer-divider"></div>
+
+    <p class="footer-org">KLNCE • Technozare 2026</p>
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
