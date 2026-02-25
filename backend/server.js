@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static("../public"));
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = "579c8fa1-d8a9-4c65-9e34-48831040c1dc:Qdxch_fv0QProTwp_DfA2ar2t7J0oVal";
+const API_KEY = process.env.KREA_API_KEY;
 
 if (!API_KEY) {
     console.error("KREA_API_KEY is missing in .env file");
