@@ -9,17 +9,24 @@ const $sizeSelect  = document.getElementById('sizeSelect');
 const $stepsSelect = document.getElementById('stepsSelect');
 const $genBtn      = document.getElementById('generateBtn');
 const $voiceBtn    = document.getElementById("voiceBtn");
+
 const $statusBar   = document.getElementById('statusBar');
 const $statusDot   = document.getElementById('statusDot');
 const $statusText  = document.getElementById('statusText');
 const $errorBox    = document.getElementById('errorBox');
 const $errorText   = document.getElementById('errorText');
+
 const $imageCard   = document.getElementById('imageCard');
 const $imageWrap   = document.getElementById('imageWrap');
 const $skeleton    = document.getElementById('skeleton');
 const $promptPrev  = document.querySelector('#promptPreview span');
 const $downloadBtn = document.getElementById('downloadBtn');
 const $charCounter = document.getElementById('charCounter');
+
+/* 🔥 NEW — Explanation DOM */
+const $explanationBox  = document.getElementById("explanationBox");
+const $explanationText = document.getElementById("explanationText");
+const $speakBtn        = document.getElementById("speakBtn");
 
 /* Character Counter */
 $prompt.addEventListener('input', () => {
@@ -89,6 +96,12 @@ function resetImageCard() {
   $skeleton.style.display = 'block';
   $imageCard.classList.add('hidden');
   currentImgUrl = null;
+
+  /* Hide explanation on reset */
+  if ($explanationBox) {
+    $explanationBox.style.display = "none";
+    $explanationText.textContent = "";
+  }
 }
 
 /* Show Image */
@@ -188,6 +201,13 @@ async function triggerGenerate() {
     }
 
     showImage(data.imageUrl, promptText);
+
+    /* 🔥 NEW — Show Explanation */
+    if (data.explanation && $explanationBox) {
+      $explanationText.textContent = data.explanation;
+      $explanationBox.style.display = "block";
+    }
+
     setGenerating(false);
 
   } catch (err) {
@@ -197,7 +217,7 @@ async function triggerGenerate() {
 }
 
 /* ===============================
-   🎤 VOICE FEATURE (OUTSIDE)
+   🎤 VOICE TO TEXT
 ================================ */
 
 const SpeechRecognition =
@@ -233,4 +253,23 @@ if (SpeechRecognition && $voiceBtn) {
 } else if ($voiceBtn) {
   $voiceBtn.disabled = true;
   $voiceBtn.textContent = "Voice not supported";
+}
+
+/* ===============================
+   🔊 TEXT TO SPEECH (Explanation)
+================================ */
+
+if ('speechSynthesis' in window && $speakBtn) {
+
+  $speakBtn.addEventListener("click", () => {
+    const text = $explanationText.textContent;
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    speechSynthesis.speak(utterance);
+  });
+
 }
