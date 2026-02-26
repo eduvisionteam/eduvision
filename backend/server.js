@@ -135,7 +135,14 @@ app.post("/generate", async (req, res) => {
             });
         }
 
-        return res.json({ imageUrl });
+        /* 🔥 NEW: Add explanation */
+
+        const explanation = `This image illustrates ${prompt}. It highlights the key structures clearly for better conceptual understanding in an educational context.`;
+
+        return res.json({ 
+            imageUrl,
+            explanation
+        });
 
     } catch (error) {
         console.error("Server Error:", error);
