@@ -4,154 +4,192 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors({
-  origin: "*"
-}));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.static("../public"));
 
 const PORT = process.env.PORT || 3000;
-const API_KEY = process.env.KREA_API_KEY;
 
-if (!API_KEY) {
-    console.error("KREA_API_KEY is missing in .env file");
-    process.exit(1);
+/* 🔥 MULTIPLE API KEYS SUPPORT */
+
+const API_KEYS = [
+  process.env.KREA_API_KEY_1,
+  process.env.KREA_API_KEY_2,
+  process.env.KREA_API_KEY_3,
+  process.env.KREA_API_KEY_4,
+  process.env.KREA_API_KEY_5
+].filter(Boolean);
+
+if (API_KEYS.length === 0) {
+  console.error("No KREA API keys found in environment variables.");
+  process.exit(1);
 }
 
+/* =========================================
+   GENERATE ROUTE
+========================================= */
+
 app.post("/generate", async (req, res) => {
-    try {
-        const { prompt, width, height, steps } = req.body;
+  try {
+    const { prompt, width, height, steps } = req.body;
 
-        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-            return res.status(400).json({
-                error: "Prompt is required"
-            });
-        }
+    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+      return res.status(400).json({
+        error: "Prompt is required"
+      });
+    }
 
-        const createResponse = await fetch(
-            "https://api.krea.ai/generate/image/bfl/flux-1-dev",
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    prompt: prompt.trim(),
-                    width: width || 1024,
-                    height: height || 1024,
-                    steps: steps || 28
-                })
-            }
+    let createResponse = null;
+    let createData = null;
+    let workingKey = null;
+
+    /* 🔥 TRY EACH KEY UNTIL ONE WORKS */
+
+    for (let key of API_KEYS) {
+      try {
+        createResponse = await fetch(
+          "https://api.krea.ai/generate/image/bfl/flux-1-dev",
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${key}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              prompt: prompt.trim(),
+              width: width || 1024,
+              height: height || 1024,
+              steps: steps || 28
+            })
+          }
         );
 
-        const createData = await createResponse.json();
+        createData = await createResponse.json();
 
-        if (!createResponse.ok) {
-
-            const errorMessage =
-                createData?.error ||
-                createData?.message ||
-                JSON.stringify(createData);
-
-            const lowerError = errorMessage.toLowerCase();
-
-            if (lowerError.includes("balance") || lowerError.includes("insufficient")) {
-                return res.status(402).json({
-                    error: "Insufficient balance in Krea account"
-                });
-            }
-
-            if (lowerError.includes("unauthorized") || lowerError.includes("invalid api")) {
-                return res.status(401).json({
-                    error: "Invalid API key"
-                });
-            }
-
-            return res.status(createResponse.status).json({
-                error: "Krea API error",
-                details: createData
-            });
+        if (createResponse.ok) {
+          workingKey = key;
+          console.log("Using API Key:", key.slice(-6));
+          break; // SUCCESS
         }
 
-        const jobId = createData.job_id;
+        const errorMessage =
+          createData?.error ||
+          createData?.message ||
+          JSON.stringify(createData);
 
-        if (!jobId) {
-            return res.status(400).json({
-                error: "Job creation failed",
-                details: createData
-            });
+        const lowerError = errorMessage.toLowerCase();
+
+        if (lowerError.includes("balance") || lowerError.includes("insufficient")) {
+          console.warn("Key exhausted. Trying next key...");
+          continue; // Try next key
         }
 
-        let imageUrl = null;
-        let attempts = 0;
-        const maxAttempts = 40;
-
-        while (!imageUrl && attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            attempts++;
-
-            const pollResponse = await fetch(
-                `https://api.krea.ai/jobs/${jobId}`,
-                {
-                    headers: {
-                        "Authorization": `Bearer ${API_KEY}`
-                    }
-                }
-            );
-
-            const pollData = await pollResponse.json();
-
-            if (!pollResponse.ok) {
-                return res.status(pollResponse.status).json({
-                    error: "Polling error",
-                    details: pollData
-                });
-            }
-
-            const status = pollData.status?.toLowerCase();
-
-            if (["completed", "succeeded", "done", "success"].includes(status)) {
-                imageUrl =
-                    pollData?.result?.urls?.[0] ||
-                    pollData?.result?.images?.[0]?.url ||
-                    pollData?.result?.image_url ||
-                    pollData?.image_url ||
-                    pollData?.output?.url ||
-                    null;
-            }
-
-            if (["failed", "error", "cancelled"].includes(status)) {
-                return res.status(500).json({
-                    error: "Image generation failed",
-                    details: pollData
-                });
-            }
+        if (lowerError.includes("unauthorized") || lowerError.includes("invalid")) {
+          console.warn("Invalid key. Trying next key...");
+          continue; // Try next key
         }
 
-        if (!imageUrl) {
-            return res.status(500).json({
-                error: "Generation timed out"
-            });
-        }
-
-        /* 🔥 NEW: Add explanation */
-
-        const explanation = `This image illustrates ${prompt}. It highlights the key structures clearly for better conceptual understanding in an educational context.`;
-
-        return res.json({ 
-            imageUrl,
-            explanation
+        return res.status(createResponse.status).json({
+          error: "Krea API error",
+          details: createData
         });
 
-    } catch (error) {
-        console.error("Server Error:", error);
-        return res.status(500).json({
-            error: "Internal server error"
-        });
+      } catch (err) {
+        console.error("Key attempt failed:", err);
+        continue;
+      }
     }
+
+    if (!createResponse || !createResponse.ok) {
+      return res.status(402).json({
+        error: "All API keys exhausted or invalid."
+      });
+    }
+
+    const jobId = createData.job_id;
+
+    if (!jobId) {
+      return res.status(400).json({
+        error: "Job creation failed",
+        details: createData
+      });
+    }
+
+    /* =========================================
+       POLLING USING WORKING KEY
+    ========================================= */
+
+    let imageUrl = null;
+    let attempts = 0;
+    const maxAttempts = 40;
+
+    while (!imageUrl && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      attempts++;
+
+      const pollResponse = await fetch(
+        `https://api.krea.ai/jobs/${jobId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${workingKey}`
+          }
+        }
+      );
+
+      const pollData = await pollResponse.json();
+
+      if (!pollResponse.ok) {
+        return res.status(pollResponse.status).json({
+          error: "Polling error",
+          details: pollData
+        });
+      }
+
+      const status = pollData.status?.toLowerCase();
+
+      if (["completed", "succeeded", "done", "success"].includes(status)) {
+        imageUrl =
+          pollData?.result?.urls?.[0] ||
+          pollData?.result?.images?.[0]?.url ||
+          pollData?.result?.image_url ||
+          pollData?.image_url ||
+          pollData?.output?.url ||
+          null;
+      }
+
+      if (["failed", "error", "cancelled"].includes(status)) {
+        return res.status(500).json({
+          error: "Image generation failed",
+          details: pollData
+        });
+      }
+    }
+
+    if (!imageUrl) {
+      return res.status(500).json({
+        error: "Generation timed out"
+      });
+    }
+
+    /* 🔥 SMART EXPLANATION */
+
+    const explanation = `This image illustrates ${prompt}. It visually represents the key structures and relationships to help students understand the concept clearly in an educational context.`;
+
+    return res.json({
+      imageUrl,
+      explanation
+    });
+
+  } catch (error) {
+    console.error("Server Error:", error);
+    return res.status(500).json({
+      error: "Internal server error"
+    });
+  }
 });
 
+/* ========================================= */
+
 app.listen(PORT, () => {
-    console.log(`EduVision backend running on http://localhost:${PORT}`);
+  console.log(`EduVision backend running on port ${PORT}`);
 });
