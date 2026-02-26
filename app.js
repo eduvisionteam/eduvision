@@ -7,6 +7,8 @@ let currentImgUrl = null;
 const $prompt      = document.getElementById('prompt');
 const $sizeSelect  = document.getElementById('sizeSelect');
 const $stepsSelect = document.getElementById('stepsSelect');
+const $subjectSelect = document.getElementById('subjectSelect');
+const $outputTypeSelect = document.getElementById('outputTypeSelect');
 const $genBtn      = document.getElementById('generateBtn');
 const $voiceBtn    = document.getElementById("voiceBtn");
 
