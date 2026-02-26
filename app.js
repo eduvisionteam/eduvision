@@ -3,12 +3,16 @@
 let generating = false;
 let currentImgUrl = null;
 
-/* DOM */
+/* ===============================
+   DOM ELEMENTS
+================================ */
+
 const $prompt      = document.getElementById('prompt');
 const $sizeSelect  = document.getElementById('sizeSelect');
 const $stepsSelect = document.getElementById('stepsSelect');
 const $subjectSelect = document.getElementById('subjectSelect');
 const $outputTypeSelect = document.getElementById('outputTypeSelect');
+
 const $genBtn      = document.getElementById('generateBtn');
 const $voiceBtn    = document.getElementById("voiceBtn");
 
@@ -25,19 +29,24 @@ const $promptPrev  = document.querySelector('#promptPreview span');
 const $downloadBtn = document.getElementById('downloadBtn');
 const $charCounter = document.getElementById('charCounter');
 
-/* 🔥 NEW — Explanation DOM */
 const $explanationBox  = document.getElementById("explanationBox");
 const $explanationText = document.getElementById("explanationText");
 const $speakBtn        = document.getElementById("speakBtn");
 
-/* Character Counter */
+/* ===============================
+   CHARACTER COUNTER
+================================ */
+
 $prompt.addEventListener('input', () => {
   const n = $prompt.value.length;
   $charCounter.textContent = n + ' / 1000';
   $charCounter.classList.toggle('warn', n > 900);
 });
 
-/* Enter to Generate */
+/* ===============================
+   ENTER TO GENERATE
+================================ */
+
 $prompt.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
@@ -45,10 +54,12 @@ $prompt.addEventListener('keydown', (e) => {
   }
 });
 
-/* Generate Button */
 $genBtn.addEventListener('click', triggerGenerate);
 
-/* Download Button */
+/* ===============================
+   DOWNLOAD BUTTON
+================================ */
+
 $downloadBtn.addEventListener('click', () => {
   if (!currentImgUrl) return;
 
@@ -60,11 +71,11 @@ $downloadBtn.addEventListener('click', () => {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
-  showToast("Download started ✔", true);
 });
 
-/* UI Helpers */
+/* ===============================
+   UI HELPERS
+================================ */
 
 function setStatus(msg, type = 'loading') {
   $statusBar.classList.remove('hidden');
@@ -99,14 +110,15 @@ function resetImageCard() {
   $imageCard.classList.add('hidden');
   currentImgUrl = null;
 
-  /* Hide explanation on reset */
   if ($explanationBox) {
     $explanationBox.style.display = "none";
     $explanationText.textContent = "";
   }
 }
 
-/* Show Image */
+/* ===============================
+   SHOW IMAGE
+================================ */
 
 function showImage(url, promptText) {
   $skeleton.style.display = 'none';
@@ -117,7 +129,6 @@ function showImage(url, promptText) {
   img.src = url;
   img.style.opacity = '0';
   img.style.transition = 'opacity .5s ease';
-  img.style.cursor = 'pointer';
 
   img.onload = () => img.style.opacity = '1';
 
@@ -132,35 +143,9 @@ function showImage(url, promptText) {
   setStatus('Image ready', 'success');
 }
 
-/* Toast Notification */
-
-function showToast(message, success = true) {
-  const toast = document.createElement('div');
-  toast.textContent = message;
-
-  toast.style.position = 'fixed';
-  toast.style.bottom = '30px';
-  toast.style.right = '30px';
-  toast.style.padding = '12px 20px';
-  toast.style.borderRadius = '10px';
-  toast.style.color = '#fff';
-  toast.style.background = success ? '#10b981' : '#ef4444';
-  toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.25)';
-  toast.style.zIndex = '9999';
-  toast.style.opacity = '0';
-  toast.style.transition = 'opacity .3s ease';
-
-  document.body.appendChild(toast);
-
-  setTimeout(() => toast.style.opacity = '1', 10);
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
-/* Backend Call */
+/* ===============================
+   GENERATE FUNCTION
+================================ */
 
 async function triggerGenerate() {
   if (generating) return;
@@ -169,6 +154,40 @@ async function triggerGenerate() {
   if (!promptText) {
     showError('Please describe the image you want to create.');
     return;
+  }
+
+  /* 🔥 SUBJECT + OUTPUT INJECTION */
+
+  let enhancedPrompt = promptText;
+
+  const subject = $subjectSelect?.value || "general";
+
+  if (subject === "biology") {
+    enhancedPrompt = "Educational biology textbook labeled diagram of " + promptText;
+  }
+  else if (subject === "physics") {
+    enhancedPrompt = "Educational physics schematic diagram with labeled forces and arrows of " + promptText;
+  }
+  else if (subject === "chemistry") {
+    enhancedPrompt = "Educational chemistry structural diagram with clear molecular representation of " + promptText;
+  }
+  else if (subject === "mathematics") {
+    enhancedPrompt = "Mathematical illustration with step-by-step representation of " + promptText;
+  }
+  else if (subject === "geography") {
+    enhancedPrompt = "Geography textbook style labeled map or diagram of " + promptText;
+  }
+
+  const outputType = $outputTypeSelect?.value || "diagram";
+
+  if (outputType === "flowchart") {
+    enhancedPrompt += " presented as a structured flowchart with arrows and process blocks";
+  }
+  else if (outputType === "concept") {
+    enhancedPrompt += " presented as a connected concept map with labeled nodes";
+  }
+  else if (outputType === "3d") {
+    enhancedPrompt += " rendered as a clean 3D educational illustration";
   }
 
   clearError();
@@ -185,7 +204,7 @@ async function triggerGenerate() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        prompt: promptText,
+        prompt: enhancedPrompt,
         width: w,
         height: h,
         steps: steps
@@ -204,7 +223,6 @@ async function triggerGenerate() {
 
     showImage(data.imageUrl, promptText);
 
-    /* 🔥 NEW — Show Explanation */
     if (data.explanation && $explanationBox) {
       $explanationText.textContent = data.explanation;
       $explanationBox.style.display = "block";
@@ -219,7 +237,7 @@ async function triggerGenerate() {
 }
 
 /* ===============================
-   🎤 VOICE TO TEXT
+   VOICE TO TEXT
 ================================ */
 
 const SpeechRecognition =
@@ -247,18 +265,10 @@ if (SpeechRecognition && $voiceBtn) {
     $voiceBtn.textContent = "🎤 Speak";
   };
 
-  recognition.onerror = (event) => {
-    alert("Voice recognition error: " + event.error);
-    $voiceBtn.textContent = "🎤 Speak";
-  };
-
-} else if ($voiceBtn) {
-  $voiceBtn.disabled = true;
-  $voiceBtn.textContent = "Voice not supported";
 }
 
 /* ===============================
-   🔊 TEXT TO SPEECH (Explanation)
+   TEXT TO SPEECH
 ================================ */
 
 if ('speechSynthesis' in window && $speakBtn) {
@@ -268,9 +278,6 @@ if ('speechSynthesis' in window && $speakBtn) {
     if (!text) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1;
-    utterance.pitch = 1;
-
     speechSynthesis.speak(utterance);
   });
 
