@@ -42,8 +42,8 @@
         Turn concepts into<br><em>powerful visuals</em>
       </h1>
       <p class="hero-sub">
-        Designed for students and educators — generate textbook-style, labeled,
-        high-quality educational visuals instantly.
+        Designed for students and educators — generate textbook-style,
+        structured, high-quality educational visuals instantly.
       </p>
       <div class="hero-divider"></div>
     </div>
@@ -54,7 +54,7 @@
       <div class="prompt-card">
 
         <textarea id="prompt"
-          placeholder="Example: Labeled diagram of the human heart showing atria, ventricles, valves, and blood flow direction..."
+          placeholder="Example: Structure of human heart with blood flow..."
           spellcheck="true"
           autocomplete="off"
           maxlength="1000"></textarea>
@@ -67,9 +67,7 @@
 
         <div class="prompt-footer">
           <div class="prompt-hint">
-            <span style="margin-left:4px">
-              Press Ctrl + Enter to generate
-            </span>
+            Press Ctrl + Enter to generate
           </div>
           <span class="char-counter" id="charCounter">0 / 1000</span>
         </div>
@@ -84,12 +82,12 @@
           <span class="pill-label">Subject</span>
           <div class="pill-select-wrap">
             <select class="pill-select" id="subjectSelect">
-              <option value="general" selected>General</option>
-              <option value="biology">Biology</option>
-              <option value="physics">Physics</option>
-              <option value="chemistry">Chemistry</option>
-              <option value="mathematics">Mathematics</option>
-              <option value="geography">Geography</option>
+              <option value="General" selected>General</option>
+              <option value="Biology">Biology</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Geography">Geography</option>
             </select>
           </div>
         </div>
@@ -99,10 +97,12 @@
           <span class="pill-label">Output Type</span>
           <div class="pill-select-wrap">
             <select class="pill-select" id="outputTypeSelect">
-              <option value="diagram" selected>Labeled Diagram</option>
-              <option value="flowchart">Flowchart</option>
-              <option value="concept">Concept Map</option>
-              <option value="3d">3D Illustration</option>
+              <option value="General" selected>General</option>
+              <option value="Labeled Diagram">Labeled Diagram</option>
+              <option value="Flowchart">Flowchart</option>
+              <option value="Concept Map">Concept Map</option>
+              <option value="3D Illustration">3D Illustration</option>
+              <option value="Infographic">Infographic</option>
             </select>
           </div>
         </div>
