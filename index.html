@@ -59,7 +59,6 @@
           autocomplete="off"
           maxlength="1000"></textarea>
 
-        <!-- Voice Button -->
         <div style="display:flex; justify-content:flex-end; padding: 10px 20px 0;">
           <button id="voiceBtn" type="button" class="btn-download">
             🎤 Speak
@@ -80,6 +79,35 @@
       <!-- Controls -->
       <div class="controls-row">
 
+        <!-- Subject Selector -->
+        <div class="pill-group">
+          <span class="pill-label">Subject</span>
+          <div class="pill-select-wrap">
+            <select class="pill-select" id="subjectSelect">
+              <option value="general" selected>General</option>
+              <option value="biology">Biology</option>
+              <option value="physics">Physics</option>
+              <option value="chemistry">Chemistry</option>
+              <option value="mathematics">Mathematics</option>
+              <option value="geography">Geography</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Output Type Selector -->
+        <div class="pill-group">
+          <span class="pill-label">Output Type</span>
+          <div class="pill-select-wrap">
+            <select class="pill-select" id="outputTypeSelect">
+              <option value="diagram" selected>Labeled Diagram</option>
+              <option value="flowchart">Flowchart</option>
+              <option value="concept">Concept Map</option>
+              <option value="3d">3D Illustration</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Size -->
         <div class="pill-group">
           <span class="pill-label">Size</span>
           <div class="pill-select-wrap">
@@ -93,6 +121,7 @@
           </div>
         </div>
 
+        <!-- Steps -->
         <div class="pill-group">
           <span class="pill-label">Steps</span>
           <div class="pill-select-wrap">
