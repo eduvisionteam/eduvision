@@ -52,23 +52,19 @@
 
       <!-- Prompt Card -->
       <div class="prompt-card">
+
         <textarea id="prompt"
           placeholder="Example: Labeled diagram of the human heart showing atria, ventricles, valves, and blood flow direction..."
           spellcheck="true"
           autocomplete="off"
           maxlength="1000"></textarea>
-        <!-- 🎤 ADD THIS RIGHT HERE -->
-    <div style="display:flex; justify-content:flex-end; padding: 0 20px 10px;">
-        <button id="voiceBtn" type="button" class="btn-download">
+
+        <!-- Voice Button -->
+        <div style="display:flex; justify-content:flex-end; padding: 10px 20px 0;">
+          <button id="voiceBtn" type="button" class="btn-download">
             🎤 Speak
-        </button>
-    </div>
-
-    <div class="prompt-footer">
-        ...
-    </div>
-
-</div>
+          </button>
+        </div>
 
         <div class="prompt-footer">
           <div class="prompt-hint">
@@ -78,6 +74,7 @@
           </div>
           <span class="char-counter" id="charCounter">0 / 1000</span>
         </div>
+
       </div>
 
       <!-- Controls -->
@@ -140,6 +137,16 @@
               Download
             </button>
           </div>
+
+          <!-- Explanation Section -->
+          <div id="explanationBox" style="margin-top:20px; display:none;">
+            <h4>Explanation</h4>
+            <p id="explanationText"></p>
+            <button id="speakBtn" class="btn-download" type="button">
+              🔊 Speak Explanation
+            </button>
+          </div>
+
         </div>
 
       </div>
