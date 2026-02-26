@@ -21,7 +21,7 @@ const API_KEYS = [
 ].filter(Boolean);
 
 if (API_KEYS.length === 0) {
-  console.error("No KREA API keys found in environment variables.");
+  console.error("❌ No KREA API keys found in environment variables.");
   process.exit(1);
 }
 
@@ -45,7 +45,13 @@ app.post("/generate", async (req, res) => {
 
     /* 🔥 TRY EACH KEY UNTIL ONE WORKS */
 
-    for (let key of API_KEYS) {
+    for (let i = 0; i < API_KEYS.length; i++) {
+
+      const key = API_KEYS[i];
+      const maskedKey = key.slice(-6);
+
+      console.log(`🔑 Trying API Key #${i + 1} (...${maskedKey})`);
+
       try {
         createResponse = await fetch(
           "https://api.krea.ai/generate/image/bfl/flux-1-dev",
@@ -68,8 +74,8 @@ app.post("/generate", async (req, res) => {
 
         if (createResponse.ok) {
           workingKey = key;
-          console.log("Using API Key:", key.slice(-6));
-          break; // SUCCESS
+          console.log(`✅ SUCCESS using API Key #${i + 1}`);
+          break;
         }
 
         const errorMessage =
@@ -80,27 +86,29 @@ app.post("/generate", async (req, res) => {
         const lowerError = errorMessage.toLowerCase();
 
         if (lowerError.includes("balance") || lowerError.includes("insufficient")) {
-          console.warn("Key exhausted. Trying next key...");
-          continue; // Try next key
+          console.warn(`⚠️ Key #${i + 1} exhausted. Trying next key...`);
+          continue;
         }
 
         if (lowerError.includes("unauthorized") || lowerError.includes("invalid")) {
-          console.warn("Invalid key. Trying next key...");
-          continue; // Try next key
+          console.warn(`⚠️ Key #${i + 1} invalid. Trying next key...`);
+          continue;
         }
 
+        console.error("❌ Unexpected Krea API error:", createData);
         return res.status(createResponse.status).json({
           error: "Krea API error",
           details: createData
         });
 
       } catch (err) {
-        console.error("Key attempt failed:", err);
+        console.error(`❌ Network error with Key #${i + 1}:`, err);
         continue;
       }
     }
 
     if (!createResponse || !createResponse.ok) {
+      console.error("❌ All API keys exhausted or invalid.");
       return res.status(402).json({
         error: "All API keys exhausted or invalid."
       });
@@ -123,6 +131,8 @@ app.post("/generate", async (req, res) => {
     let attempts = 0;
     const maxAttempts = 40;
 
+    console.log("⏳ Polling for image result...");
+
     while (!imageUrl && attempts < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, 3000));
       attempts++;
@@ -139,6 +149,7 @@ app.post("/generate", async (req, res) => {
       const pollData = await pollResponse.json();
 
       if (!pollResponse.ok) {
+        console.error("❌ Polling error:", pollData);
         return res.status(pollResponse.status).json({
           error: "Polling error",
           details: pollData
@@ -155,9 +166,12 @@ app.post("/generate", async (req, res) => {
           pollData?.image_url ||
           pollData?.output?.url ||
           null;
+
+        console.log("🖼 Image generation completed.");
       }
 
       if (["failed", "error", "cancelled"].includes(status)) {
+        console.error("❌ Image generation failed:", pollData);
         return res.status(500).json({
           error: "Image generation failed",
           details: pollData
@@ -166,6 +180,7 @@ app.post("/generate", async (req, res) => {
     }
 
     if (!imageUrl) {
+      console.error("❌ Generation timed out.");
       return res.status(500).json({
         error: "Generation timed out"
       });
@@ -181,7 +196,7 @@ app.post("/generate", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Server Error:", error);
+    console.error("❌ Server Error:", error);
     return res.status(500).json({
       error: "Internal server error"
     });
@@ -191,5 +206,5 @@ app.post("/generate", async (req, res) => {
 /* ========================================= */
 
 app.listen(PORT, () => {
-  console.log(`EduVision backend running on port ${PORT}`);
+  console.log(`🚀 EduVision backend running on port ${PORT}`);
 });
