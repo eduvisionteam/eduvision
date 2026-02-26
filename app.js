@@ -8,6 +8,7 @@ const $prompt      = document.getElementById('prompt');
 const $sizeSelect  = document.getElementById('sizeSelect');
 const $stepsSelect = document.getElementById('stepsSelect');
 const $genBtn      = document.getElementById('generateBtn');
+const $voiceBtn = document.getElementById("voiceBtn");
 const $statusBar   = document.getElementById('statusBar');
 const $statusDot   = document.getElementById('statusDot');
 const $statusText  = document.getElementById('statusText');
@@ -155,6 +156,40 @@ async function triggerGenerate() {
     showError('Please describe the image you want to create.');
     return;
   }
+  const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (SpeechRecognition) {
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  $voiceBtn.addEventListener("click", () => {
+    recognition.start();
+    $voiceBtn.textContent = "🎙 Listening...";
+  });
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    $prompt.value = transcript;
+    $prompt.dispatchEvent(new Event("input"));
+  };
+
+  recognition.onend = () => {
+    $voiceBtn.textContent = "🎤 Speak";
+  };
+
+  recognition.onerror = (event) => {
+    alert("Voice recognition error: " + event.error);
+    $voiceBtn.textContent = "🎤 Speak";
+  };
+
+} else {
+  $voiceBtn.disabled = true;
+  $voiceBtn.textContent = "Voice not supported";
+}
 
   clearError();
   resetImageCard();
