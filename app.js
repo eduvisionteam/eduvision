@@ -106,6 +106,7 @@ function setGenerating(v) {
 function resetImageCard() {
   const img = $imageWrap.querySelector('img');
   if (img) img.remove();
+
   $skeleton.style.display = 'block';
   $imageCard.classList.add('hidden');
   currentImgUrl = null;
@@ -120,12 +121,12 @@ function resetImageCard() {
    SHOW IMAGE
 ================================ */
 
-function showImage(url, promptText) {
+function showImage(url, originalPrompt) {
   $skeleton.style.display = 'none';
   currentImgUrl = url;
 
   const img = document.createElement('img');
-  img.alt = promptText;
+  img.alt = originalPrompt;
   img.src = url;
   img.style.opacity = '0';
   img.style.transition = 'opacity .5s ease';
@@ -137,10 +138,34 @@ function showImage(url, promptText) {
   });
 
   $imageWrap.appendChild(img);
-  $promptPrev.textContent = promptText;
+  $promptPrev.textContent = originalPrompt;
   $imageCard.classList.remove('hidden');
 
   setStatus('Image ready', 'success');
+}
+
+/* ===============================
+   SMART PROMPT BUILDER
+================================ */
+
+function buildEnhancedPrompt(userPrompt) {
+
+  const subject = $subjectSelect?.value || "General";
+  const outputType = $outputTypeSelect?.value || "General";
+
+  let enhanced = userPrompt;
+
+  /* Subject Enhancement */
+  if (subject !== "General") {
+    enhanced = `Educational ${subject} concept: ${enhanced}`;
+  }
+
+  /* Output Type Enhancement */
+  if (outputType !== "General") {
+    enhanced += `. Create it as a professional ${outputType}, clean, structured, textbook-style and clearly presented.`;
+  }
+
+  return enhanced;
 }
 
 /* ===============================
@@ -150,45 +175,13 @@ function showImage(url, promptText) {
 async function triggerGenerate() {
   if (generating) return;
 
-  const promptText = $prompt.value.trim();
-  if (!promptText) {
+  const userPrompt = $prompt.value.trim();
+  if (!userPrompt) {
     showError('Please describe the image you want to create.');
     return;
   }
 
-  /* 🔥 SUBJECT + OUTPUT INJECTION */
-
-  let enhancedPrompt = promptText;
-
-  const subject = $subjectSelect?.value || "general";
-
-  if (subject === "biology") {
-    enhancedPrompt = "Educational biology textbook labeled diagram of " + promptText;
-  }
-  else if (subject === "physics") {
-    enhancedPrompt = "Educational physics schematic diagram with labeled forces and arrows of " + promptText;
-  }
-  else if (subject === "chemistry") {
-    enhancedPrompt = "Educational chemistry structural diagram with clear molecular representation of " + promptText;
-  }
-  else if (subject === "mathematics") {
-    enhancedPrompt = "Mathematical illustration with step-by-step representation of " + promptText;
-  }
-  else if (subject === "geography") {
-    enhancedPrompt = "Geography textbook style labeled map or diagram of " + promptText;
-  }
-
-  const outputType = $outputTypeSelect?.value || "diagram";
-
-  if (outputType === "flowchart") {
-    enhancedPrompt += " presented as a structured flowchart with arrows and process blocks";
-  }
-  else if (outputType === "concept") {
-    enhancedPrompt += " presented as a connected concept map with labeled nodes";
-  }
-  else if (outputType === "3d") {
-    enhancedPrompt += " rendered as a clean 3D educational illustration";
-  }
+  const enhancedPrompt = buildEnhancedPrompt(userPrompt);
 
   clearError();
   resetImageCard();
@@ -221,7 +214,7 @@ async function triggerGenerate() {
       throw new Error("No image returned from backend.");
     }
 
-    showImage(data.imageUrl, promptText);
+    showImage(data.imageUrl, userPrompt);
 
     if (data.explanation && $explanationBox) {
       $explanationText.textContent = data.explanation;
@@ -264,7 +257,6 @@ if (SpeechRecognition && $voiceBtn) {
   recognition.onend = () => {
     $voiceBtn.textContent = "🎤 Speak";
   };
-
 }
 
 /* ===============================
@@ -278,6 +270,9 @@ if ('speechSynthesis' in window && $speakBtn) {
     if (!text) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
     speechSynthesis.speak(utterance);
   });
 
