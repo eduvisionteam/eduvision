@@ -17,7 +17,12 @@ const API_KEYS = [
   process.env.KREA_API_KEY_2,
   process.env.KREA_API_KEY_3,
   process.env.KREA_API_KEY_4,
-  process.env.KREA_API_KEY_5
+  process.env.KREA_API_KEY_5,
+  process.env.KREA_API_KEY_6,
+  process.env.KREA_API_KEY_7,
+  process.env.KREA_API_KEY_8,
+  process.env.KREA_API_KEY_9,
+  process.env.KREA_API_KEY_10
 ].filter(Boolean);
 
 if (API_KEYS.length === 0) {
