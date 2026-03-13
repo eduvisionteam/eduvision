@@ -190,6 +190,7 @@ app.post("/generate", async (req, res) => {
         error: "Generation timed out"
       });
     }
+    console.log("Generated Image URL:", imageUrl);
 
     /* 🔥 SMART EXPLANATION */
 
